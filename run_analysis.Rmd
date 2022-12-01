@@ -16,7 +16,6 @@ path_data <- function(x) paste0("data/",x)
 act_label_1 <- read_table(path_data("UCI HAR Dataset/activity_labels.txt"),col_names = FALSE)
 act_names <- act_label_1 %>% pull(X1)
 names(act_names) <- act_label_1 %>% pull(X2)
-myALs2 <- select(act_label_1, WALKING)
 
 ##Load and select features that include mean or standard deviation
 features1 <- read.table(path_data("UCI HAR Dataset/features.txt"))
@@ -61,8 +60,10 @@ mydata <- tbl_df(rbind(mytrain4, mytest4))
 
 names(mydata) <- clean_col_names
 dings <- mydata %>% mutate(activity=as_factor(activity)) %>% mutate(activity=fct_recode(activity, WALKING ="1",  WALKING_UPSTAIRS="2", WALKING_DOWNSTAIRS="3",           SITTING="4",           STANDING  ="5",           LAYING="6"))
-
+#compute average
 avg_subj_acti <- dings %>% group_by(subject_number,activity) %>% summarise(across(t_body_accelerator_mean_x:clean_col_names[81], mean))
-avg_subj_acti
+write.table(avg_subj_acti, "avg_subj_acti.txt", row.names = FALSE)
+#create column description (Code book)
+tibble(clean_col_names=clean_col_names[3:81], featuresnames=featuresnames) %>% write_csv("clean_colnames_featuresnames_conversion.csv")
 ```
 

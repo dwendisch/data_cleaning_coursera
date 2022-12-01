@@ -2,9 +2,9 @@
 
 
 Hello, how are you?
-The data was prdouced from the files found in the folder data.
-The names of columns were chagne according to "clean_colnames_featuresnames_conversion.csv".
-average measurments were computed by participent and exertion type and save in "avg_subj_acti.csv"
+The data was produced from the files found in the folder data.
+The names of columns were chagne according to "clean_colnames_featuresnames_conversion.txt".
+average measurments were computed by participent and exertion type and save in "avg_subj_acti.txt"
 Have a nice day :)
 
 
