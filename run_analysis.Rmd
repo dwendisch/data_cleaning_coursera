@@ -1,0 +1,68 @@
+---
+title: "R Notebook"
+output: html_notebook
+---
+
+```{r}
+library(tidyverse)
+library(janitor)
+path_data <- function(x) paste0("data/",x)
+
+```
+
+```{r}
+
+##Load activity labels
+act_label_1 <- read_table(path_data("UCI HAR Dataset/activity_labels.txt"),col_names = FALSE)
+act_names <- act_label_1 %>% pull(X1)
+names(act_names) <- act_label_1 %>% pull(X2)
+myALs2 <- select(act_label_1, WALKING)
+
+##Load and select features that include mean or standard deviation
+features1 <- read.table(path_data("UCI HAR Dataset/features.txt"))
+features2 <- read_table(path_data("UCI HAR Dataset/features.txt"))
+features2 <- tbl_df(features1)
+features3 <- grep(".*mean.*|.*std.*", features1[,2])
+
+##Create list of feature names
+featuresnames <- features2[features3, 2]
+
+##Transpose this list of feature names
+featuresnames <- pull(featuresnames,V2)
+
+##Make appropriate labels for the data set with descriptive variable names
+clean_col_names <- featuresnames %>% make_clean_names()%>% str_replace_all(c("acc"= "accelerator","mag"= "magnitude","gyro"="gyroscope"))
+clean_col_names <- c("subject_number","activity",clean_col_names)
+
+
+mytrain1 <- tbl_df(read.table(path_data("UCI HAR Dataset/train/X_train.txt")))[features3]
+names(mytrain1) <- featuresnames
+mytrain2 <- tbl_df(read.table(path_data("UCI HAR Dataset/train/Y_train.txt")))
+colnames(mytrain2) <- "activity"
+mytrain3 <- tbl_df(read.table(path_data("UCI HAR Dataset/train/subject_train.txt")))
+colnames(mytrain3) <- "subject_number"
+mytrain4 <- tbl_df(cbind(mytrain3, mytrain2, mytrain1))
+
+
+##Load testing data  
+##Extract only the measurements on the mean and standard deviation 
+##for each measurement
+##Appropriately label the data set with descriptive variable names
+mytest1 <- tbl_df(read.table(path_data("UCI HAR Dataset/test/X_test.txt")))[features3]
+names(mytest1) <- featuresnames
+mytest2 <- tbl_df(read.table(path_data("UCI HAR Dataset/test/Y_test.txt")))
+colnames(mytest2) <- "activity"
+mytest3 <- tbl_df(read.table(path_data("UCI HAR Dataset/test/subject_test.txt")))
+colnames(mytest3) <- "subject_number"
+mytest4 <- tbl_df(cbind(mytest3, mytest2, mytest1))
+
+##Merge the training and the test sets to create one data set
+mydata <- tbl_df(rbind(mytrain4, mytest4))
+
+names(mydata) <- clean_col_names
+dings <- mydata %>% mutate(activity=as_factor(activity)) %>% mutate(activity=fct_recode(activity, WALKING ="1",  WALKING_UPSTAIRS="2", WALKING_DOWNSTAIRS="3",           SITTING="4",           STANDING  ="5",           LAYING="6"))
+
+avg_subj_acti <- dings %>% group_by(subject_number,activity) %>% summarise(across(t_body_accelerator_mean_x:clean_col_names[81], mean))
+avg_subj_acti
+```
+
